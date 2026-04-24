@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservations - Thai Cafe</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Custom Styles -->
+    <style>
+        :root {
+            --primary: #FF5722;
+            --secondary: #4CAF50;
+            --accent: #FFC107;
+            --neutral: #F5F5F5;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            color: #2C2C2C;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Lora', serif;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: white;
+            padding: 1.25rem 1.75rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 1000;
+            border-left: 4px solid var(--primary);
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .party-size-btn {
+            transition: all 0.3s ease;
+        }
+
+        .party-size-btn.selected {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(255, 87, 34, 0.3);
+        }
+
+        .time-slot {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .time-slot:hover:not(.unavailable) {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .time-slot.selected {
+            background: var(--primary);
+            color: white;
+        }
+
+        .time-slot.unavailable {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .form-input {
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255, 87, 34, 0.1);
+        }
+
+        .success-animation {
+            animation: successPop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes successPop {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .pulse-ring {
+            animation: pulseRing 2s infinite;
+        }
+
+        @keyframes pulseRing {
+            0% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+    </style>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FF5722',
+                        secondary: '#4CAF50',
+                        accent: '#FFC107',
+                        neutral: '#F5F5F5',
+                    },
+                    fontFamily: {
+                        serif: ['Lora', 'serif'],
+                        sans: ['Outfit', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-neutral">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <div class="flex items-center gap-3">
+            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div>
+                <p class="font-semibold text-gray-900">Demo Mode</p>
+                <p class="text-sm text-gray-600">This is a visual mockup. Full functionality coming soon!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav id="navbar" class="fixed w-full top-0 z-50 transition-all duration-300 py-4 bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <svg class="w-10 h-10 text-primary" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm0 18c-3.31-1-6-4.37-6-8V8.3l6-3.11 6 3.11V12c0 3.63-2.69 7-6 8z"/>
+                    <circle cx="12" cy="11" r="2"/>
+                </svg>
+                <span class="text-2xl font-serif font-bold text-gray-900">Thai Cafe</span>
+            </div>
+
+            <div class="hidden md:flex items-center gap-8">
+                <a href="index.html" class="text-gray-700 font-medium hover:text-accent transition">Home</a>
+                <a href="menu.html" class="text-gray-700 font-medium hover:text-accent transition">Menu</a>
+                <a href="reservations.html" class="text-primary font-medium hover:text-accent transition">Reservations</a>
+                <a href="order.html" class="text-gray-700 font-medium hover:text-accent transition">Order Online</a>
+                <a href="gallery.html" class="text-gray-700 font-medium hover:text-accent transition">Gallery</a>
+                <button onclick="showToast()" class="bg-primary hover:bg-orange-600 text-white px-6 py-2 rounded-full font-semibold transition">
+                    Order Now
+                </button>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <button id="mobile-menu-btn" class="md:hidden text-gray-900">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="pt-32 pb-12 bg-gradient-to-br from-primary/10 to-accent/10">
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <h1 class="text-6xl font-serif font-bold mb-4">Join the Waitlist</h1>
+            <p class="text-xl text-gray-600">
+                We're packed with flavor (and people). Reserve your spot for the ultimate Thai dining experience.
+            </p>
+        </div>
+    </section>
+
+    <!-- Current Wait Time Banner -->
+    <section class="py-6 bg-white border-b">
+        <div class="max-w-4xl mx-auto px-6">
+            <div class="flex items-center justify-center gap-4">
+                <div class="relative">
+                    <div class="absolute inset-0 bg-secondary rounded-full pulse-ring"></div>
+                    <div class="relative w-3 h-3 bg-secondary rounded-full"></div>
+                </div>
+                <p class="text-lg">
+                    <span class="font-semibold">Current wait time:</span>
+                    <span class="text-primary font-bold ml-2">15-25 minutes</span>
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reservation Form -->
+    <section class="py-16">
+        <div class="max-w-4xl mx-auto px-6">
+            <div id="form-container" class="bg-white rounded-3xl shadow-2xl p-8 md:p-12">
+
+                <!-- Step 1: Party Size -->
+                <div class="mb-12">
+                    <h2 class="text-3xl font-serif font-bold mb-2">Party Size</h2>
+                    <p class="text-gray-600 mb-6">How many guests will be dining?</p>
+
+                    <div class="grid grid-cols-4 md:grid-cols-8 gap-3">
+                        <button class="party-size-btn h-16 border-2 border-gray-300 rounded-xl font-semibold text-lg hover:border-primary" onclick="selectPartySize(1, this)">1</button>
+                        <button class="party-size-btn h-16 border-2 border-gray-300 rounded-xl font-semibold text-lg hover:border-primary selected" onclick="selectPartySize(2, this)">2</button>
+                        <button class="party-size-btn h-16 border-2 border-gray-300 rounded-xl font-semibold text-lg hover:border-primary" onclick="selectPartySize(3, this)">3</button>
+                        <button class="party-size-btn h-16 border-2 border-gray-300 rounded-xl font-semibold text-lg hover:border-primary" onclick="selectPartySize(4, this)">4</button>
+                        <button class="party-size-btn h-16 border-2 border-gray-300 rounded-xl font-semibold text-lg hover:border-primary" onclick="selectPartySize(5, this)">5</button>
+                        <button class="party-size-btn h-16 border-2 border-gray-300 rounded-xl font-semibold text-lg hover:border-primary" onclick="selectPartySize(6, this)">6</button>
+                        <button class="party-size-btn h-16 border-2 border-gray-300 rounded-xl font-semibold text-lg hover:border-primary" onclick="selectPartySize(7, this)">7</button>
+                        <button class="party-size-btn h-16 border-2 border-gray-300 rounded-xl font-semibold text-lg hover:border-primary" onclick="selectPartySize(8, this)">8+</button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Date & Time -->
+                <div class="mb-12">
+                    <h2 class="text-3xl font-serif font-bold mb-2">Date & Time</h2>
+                    <p class="text-gray-600 mb-6">When would you like to visit?</p>
+
+                    <div class="grid md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Date</label>
+                            <input type="date" class="form-input w-full px-4 py-3 border-2 border-gray-300 rounded-xl" value="2024-04-25">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Preferred Time</label>
+                            <select class="form-input w-full px-4 py-3 border-2 border-gray-300 rounded-xl">
+                                <option>Lunch (11:00 AM - 3:00 PM)</option>
+                                <option>Dinner (5:00 PM - 10:00 PM)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold mb-3">Available Time Slots</label>
+                        <div class="grid grid-cols-3 md:grid-cols-5 gap-3">
+                            <div class="time-slot bg-gray-100 px-4 py-3 rounded-lg text-center font-semibold unavailable">11:00 AM</div>
+                            <div class="time-slot bg-gray-100 px-4 py-3 rounded-lg text-center font-semibold unavailable">11:30 AM</div>
+                            <div class="time-slot bg-gray-100 px-4 py-3 rounded-lg text-center font-semibold selected" onclick="selectTimeSlot(this)">12:00 PM</div>
+                            <div class="time-slot bg-gray-100 px-4 py-3 rounded-lg text-center font-semibold" onclick="selectTimeSlot(this)">12:30 PM</div>
+                            <div class="time-slot bg-gray-100 px-4 py-3 rounded-lg text-center font-semibold" onclick="selectTimeSlot(this)">1:00 PM</div>
+                            <div class="time-slot bg-gray-100 px-4 py-3 rounded-lg text-center font-semibold" onclick="selectTimeSlot(this)">1:30 PM</div>
+                            <div class="time-slot bg-gray-100 px-4 py-3 rounded-lg text-center font-semibold" onclick="selectTimeSlot(this)">2:00 PM</div>
+                            <div class="time-slot bg-gray-100 px-4 py-3 rounded-lg text-center font-semibold" onclick="selectTimeSlot(this)">2:30 PM</div>
+                            <div class="time-slot bg-gray-100 px-4 py-3 rounded-lg text-center font-semibold unavailable">5:00 PM</div>
+                            <div class="time-slot bg-gray-100 px-4 py-3 rounded-lg text-center font-semibold" onclick="selectTimeSlot(this)">5:30 PM</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Contact Info -->
+                <div class="mb-8">
+                    <h2 class="text-3xl font-serif font-bold mb-2">Your Information</h2>
+                    <p class="text-gray-600 mb-6">We'll text you when your table is ready.</p>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">First Name</label>
+                            <input type="text" placeholder="John" class="form-input w-full px-4 py-3 border-2 border-gray-300 rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Last Name</label>
+                            <input type="text" placeholder="Doe" class="form-input w-full px-4 py-3 border-2 border-gray-300 rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Phone Number</label>
+                            <input type="tel" placeholder="(949) 555-0123" class="form-input w-full px-4 py-3 border-2 border-gray-300 rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Email (Optional)</label>
+                            <input type="email" placeholder="john@example.com" class="form-input w-full px-4 py-3 border-2 border-gray-300 rounded-xl">
+                        </div>
+                    </div>
+
+                    <div class="mt-6">
+                        <label class="block text-sm font-semibold mb-2">Special Requests (Optional)</label>
+                        <textarea placeholder="Dietary restrictions, seating preferences, etc." rows="3" class="form-input w-full px-4 py-3 border-2 border-gray-300 rounded-xl resize-none"></textarea>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button onclick="submitReservation()" class="w-full bg-primary hover:bg-orange-600 text-white py-4 rounded-xl font-bold text-lg transition transform hover:scale-105 shadow-lg">
+                    Join Waitlist
+                </button>
+
+                <p class="text-center text-sm text-gray-500 mt-4">
+                    By joining, you agree to receive SMS notifications about your reservation.
+                </p>
+            </div>
+
+            <!-- Success Message (Hidden Initially) -->
+            <div id="success-container" class="bg-white rounded-3xl shadow-2xl p-8 md:p-12 text-center" style="display: none;">
+                <div class="success-animation">
+                    <div class="w-24 h-24 bg-secondary rounded-full flex items-center justify-center mx-auto mb-6">
+                        <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+
+                    <h2 class="text-4xl font-serif font-bold mb-4">You're On the List!</h2>
+                    <p class="text-xl text-gray-600 mb-8">
+                        We'll text you at <span class="font-semibold text-primary">(949) 555-0123</span> when your table is ready.
+                    </p>
+
+                    <div class="bg-neutral rounded-2xl p-6 mb-8">
+                        <div class="grid md:grid-cols-3 gap-6 text-left">
+                            <div>
+                                <p class="text-sm text-gray-600 mb-1">Party Size</p>
+                                <p class="font-bold text-lg">2 Guests</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600 mb-1">Date & Time</p>
+                                <p class="font-bold text-lg">Apr 25, 12:00 PM</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600 mb-1">Est. Wait</p>
+                                <p class="font-bold text-lg text-primary">15-25 min</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <button onclick="showToast()" class="w-full bg-primary hover:bg-orange-600 text-white py-4 rounded-xl font-bold text-lg transition">
+                            Add to Calendar
+                        </button>
+                        <button onclick="resetForm()" class="w-full border-2 border-gray-300 hover:border-primary text-gray-700 py-4 rounded-xl font-bold text-lg transition">
+                            Make Another Reservation
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Policy Section -->
+    <section class="py-16 bg-white">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-serif font-bold mb-4">Reservation Policy</h2>
+                <p class="text-gray-600">Please review our policies before joining the waitlist.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="font-serif font-bold text-xl mb-2">15-Minute Grace Period</h3>
+                    <p class="text-gray-600 text-sm">
+                        Please arrive within 15 minutes of your confirmation text, or we'll release your table.
+                    </p>
+                </div>
+
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="font-serif font-bold text-xl mb-2">One Dish Per Person</h3>
+                    <p class="text-gray-600 text-sm">
+                        During peak hours, we kindly request each guest order at least one dish.
+                    </p>
+                </div>
+
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="font-serif font-bold text-xl mb-2">Parties of 8+</h3>
+                    <p class="text-gray-600 text-sm">
+                        Large groups are welcome! Please call us directly at (949) 559-5382.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center gap-2 mb-4">
+                        <svg class="w-8 h-8 text-primary" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm0 18c-3.31-1-6-4.37-6-8V8.3l6-3.11 6 3.11V12c0 3.63-2.69 7-6 8z"/>
+                            <circle cx="12" cy="11" r="2"/>
+                        </svg>
+                        <span class="text-xl font-serif font-bold">Thai Cafe</span>
+                    </div>
+                    <p class="text-gray-400 text-sm">
+                        Authentic Thai flavors in the heart of Irvine since day one.
+                    </p>
+                </div>
+
+                <div>
+                    <h3 class="font-semibold mb-4">Quick Links</h3>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="index.html" class="hover:text-white transition">Home</a></li>
+                        <li><a href="menu.html" class="hover:text-white transition">Menu</a></li>
+                        <li><a href="reservations.html" class="hover:text-white transition">Reservations</a></li>
+                        <li><a href="order.html" class="hover:text-white transition">Order Online</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="font-semibold mb-4">Contact</h3>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li>(949) 559-5382</li>
+                        <li>14715 Jeffrey Rd<br>Irvine, CA 92618</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="font-semibold mb-4">Hours</h3>
+                    <p class="text-gray-400 text-sm">
+                        Daily: 11:00 AM – 3:00 PM<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5:00 PM – 10:00 PM
+                    </p>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800 pt-8 text-center text-gray-400 text-sm">
+                <p>&copy; 2024 Thai Cafe. All rights reserved. | This is a visual mockup for presentation purposes.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        let selectedPartySize = 2;
+        let selectedTime = '12:00 PM';
+
+        // Toast notification
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Party size selection
+        function selectPartySize(size, btn) {
+            selectedPartySize = size;
+            document.querySelectorAll('.party-size-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+        }
+
+        // Time slot selection
+        function selectTimeSlot(slot) {
+            if (!slot.classList.contains('unavailable')) {
+                selectedTime = slot.textContent;
+                document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+                slot.classList.add('selected');
+            }
+        }
+
+        // Submit reservation
+        function submitReservation() {
+            document.getElementById('form-container').style.display = 'none';
+            document.getElementById('success-container').style.display = 'block';
+            window.scrollTo({ top: 200, behavior: 'smooth' });
+        }
+
+        // Reset form
+        function resetForm() {
+            document.getElementById('success-container').style.display = 'none';
+            document.getElementById('form-container').style.display = 'block';
+            window.scrollTo({ top: 200, behavior: 'smooth' });
+        }
+
+        // Mobile menu
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+            showToast();
+        });
+    </script>
+</body>
+</html>

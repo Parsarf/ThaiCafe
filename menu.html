@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu - Thai Cafe</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Custom Styles -->
+    <style>
+        :root {
+            --primary: #FF5722;
+            --secondary: #4CAF50;
+            --accent: #FFC107;
+            --neutral: #F5F5F5;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            color: #2C2C2C;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Lora', serif;
+        }
+
+        .nav-scrolled {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding-top: 0.75rem;
+            padding-bottom: 0.75rem;
+        }
+
+        .menu-item-card {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .menu-item-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .menu-item-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .spice-icon {
+            transition: all 0.3s ease;
+        }
+
+        .spice-icon:hover {
+            filter: drop-shadow(0 0 8px var(--primary));
+            transform: scale(1.1);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: white;
+            padding: 1.25rem 1.75rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 1000;
+            border-left: 4px solid var(--primary);
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .category-tab {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .category-tab.active {
+            border-bottom: 3px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .dietary-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.625rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+    </style>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FF5722',
+                        secondary: '#4CAF50',
+                        accent: '#FFC107',
+                        neutral: '#F5F5F5',
+                    },
+                    fontFamily: {
+                        serif: ['Lora', 'serif'],
+                        sans: ['Outfit', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-neutral">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <div class="flex items-center gap-3">
+            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div>
+                <p class="font-semibold text-gray-900">Demo Mode</p>
+                <p class="text-sm text-gray-600">This is a visual mockup. Full functionality coming soon!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav id="navbar" class="fixed w-full top-0 z-50 transition-all duration-300 py-4 bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <svg class="w-10 h-10 text-primary" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm0 18c-3.31-1-6-4.37-6-8V8.3l6-3.11 6 3.11V12c0 3.63-2.69 7-6 8z"/>
+                    <circle cx="12" cy="11" r="2"/>
+                </svg>
+                <span class="text-2xl font-serif font-bold text-gray-900">Thai Cafe</span>
+            </div>
+
+            <div class="hidden md:flex items-center gap-8">
+                <a href="index.html" class="text-gray-700 font-medium hover:text-accent transition">Home</a>
+                <a href="menu.html" class="text-primary font-medium hover:text-accent transition">Menu</a>
+                <a href="reservations.html" class="text-gray-700 font-medium hover:text-accent transition">Reservations</a>
+                <a href="order.html" class="text-gray-700 font-medium hover:text-accent transition">Order Online</a>
+                <a href="gallery.html" class="text-gray-700 font-medium hover:text-accent transition">Gallery</a>
+                <button onclick="showToast()" class="bg-primary hover:bg-orange-600 text-white px-6 py-2 rounded-full font-semibold transition">
+                    Order Now
+                </button>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <button id="mobile-menu-btn" class="md:hidden text-gray-900">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="pt-32 pb-12 bg-gradient-to-br from-primary/10 to-accent/10">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <h1 class="text-6xl font-serif font-bold mb-4">Our Menu</h1>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                From Bangkok street classics to family-recipe curries. Every dish authentically crafted, perfectly balanced.
+            </p>
+        </div>
+    </section>
+
+    <!-- Category Tabs -->
+    <section class="sticky top-20 z-40 bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex gap-8 overflow-x-auto py-4">
+                <div class="category-tab active whitespace-nowrap pb-2" onclick="filterCategory('all')">
+                    <span class="font-semibold">All Dishes</span>
+                </div>
+                <div class="category-tab whitespace-nowrap pb-2" onclick="filterCategory('noodles')">
+                    <span class="font-semibold">Street Noodles</span>
+                </div>
+                <div class="category-tab whitespace-nowrap pb-2" onclick="filterCategory('curry')">
+                    <span class="font-semibold">Traditional Curries</span>
+                </div>
+                <div class="category-tab whitespace-nowrap pb-2" onclick="filterCategory('chef')">
+                    <span class="font-semibold">Chef's Specials</span>
+                </div>
+                <div class="category-tab whitespace-nowrap pb-2" onclick="filterCategory('appetizers')">
+                    <span class="font-semibold">Appetizers</span>
+                </div>
+                <div class="category-tab whitespace-nowrap pb-2" onclick="filterCategory('desserts')">
+                    <span class="font-semibold">Desserts</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Menu Items -->
+    <section class="py-12">
+        <div class="max-w-7xl mx-auto px-6">
+
+            <!-- Street Noodles -->
+            <div class="mb-16 category-section" data-category="noodles">
+                <h2 class="text-4xl font-serif font-bold mb-8 flex items-center gap-3">
+                    <span>🍜</span> Street Noodles
+                </h2>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                    <!-- Pad Thai -->
+                    <div class="menu-item-card bg-white rounded-2xl overflow-hidden shadow-lg">
+                        <div class="h-56 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1626804475297-41608ea09aeb?w=600&q=85')"></div>
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-2xl font-serif font-semibold">Pad Thai</h3>
+                                <span class="text-xl font-bold text-primary">$12.95</span>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-3">
+                                Rice noodles, egg, bean sprouts, peanuts, tamarind sauce
+                            </p>
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="spice-icon">🌶️</span>
+                                <span class="spice-icon opacity-50">🌶️</span>
+                                <span class="spice-icon opacity-50">🌶️</span>
+                                <span class="spice-icon opacity-50">🌶️</span>
+                                <span class="spice-icon opacity-50">🌶️</span>
+                            </div>
+                            <div class="flex gap-2 mb-4">
+                                <span class="dietary-badge bg-secondary/10 text-secondary">
+                                    <span>🌿</span> V
+                                </span>
+                                <span class="dietary-badge bg-accent/10 text-orange-700">
+                                    <span>🌾</span> GF*
+                                </span>
+                            </div>
+                            <button onclick="showToast()" class="w-full bg-primary hover:bg-orange-600 text-white py-3 rounded-lg font-semibold transition">
+                                Add to Order
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Pad Kee Mao -->
+                    <div class="menu-item-card bg-white rounded-2xl overflow-hidden shadow-lg">
+                        <div class="h-56 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1569562211093-4ed0d0758f12?w=600&q=85')"></div>
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-2xl font-serif font-semibold">Pad Kee Mao</h3>
+                                <span class="text-xl font-bold text-primary">$13.50</span>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-3">
+                                Drunken noodles with Thai basil, chili, vegetables in dark soy
+                            </p>
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="spice-icon">🌶️</span>
+                                <span class="spice-icon">🌶️</span>
+                                <span class="spice-icon">🌶️</span>
+                                <span class="spice-icon">🌶️</span>
+                                <span class="spice-icon opacity-50">🌶️</span>
+                            </div>
+                            <div class="flex gap-2 mb-4">
+                                <span class="dietary-badge bg-secondary/10 text-secondary">
+                                    <span>🌿</span> V
+                                </span>
+                            </div>
+                            <button onclick="showToast()" class="w-full bg-primary hover:bg-orange-600 text-white py-3 rounded-lg font-semibold transition">
+                                Add to Order
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Pad See Ew -->
+                    <div class="menu-item-card bg-white rounded-2xl overflow-hidden shadow-lg">
+                        <div class="h-56 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=600&q=85')"></div>
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-2xl font-serif font-semibold">Pad See Ew</h3>
+                                <span class="text-xl font-bold text-primary">$12.50</span>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-3">
+                                Wide rice noodles, Chinese broccoli, egg in sweet soy sauce
+                            </p>
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="spice-icon">🌶️</span>
+                                <span class="spice-icon opacity-50">🌶️</span>
+                                <span class="spice-icon opacity-50">🌶️</span>
+                                <span class="spice-icon opacity-50">🌶️</span>
+                                <span class="spice-icon opacity-50">🌶️</span>
+                            </div>
+                            <div class="flex gap-2 mb-4">
+                                <span class="dietary-badge bg-secondary/10 text-secondary">
+                                    <span>🌿</span> V
+                                </span>
+                            </div>
+                            <button onclick="showToast()" class="w-full bg-primary hover:bg-orange-600 text-white py-3 rounded-lg font-semibold transition">
+                                Add to Order
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Traditional Curries -->
+            <div class="mb-16 category-section" data-category="curry">
+                <h2 class="text-4xl font-serif font-bold mb-8 flex items-center gap-3">
+                    <span>🍛</span> Traditional Curries
+                </h2>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                    <!-- Green Curry -->
+                    <div class="menu-item-card bg-white rounded-2xl overflow-hidden shadow-lg">
+                        <div class="h-56 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?w=600&q=85')"></div>
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-2xl font-serif font-semibold">Green Curry</h3>
+                                <span class="text-xl font-bold text-primary">$13.95</span>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-3">
+                                Coconut milk, bamboo shoots, Thai basil, bell peppers
+                            </p>
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="spice-icon">🌶️</span>
+                                <span class="spice-icon">🌶️</span>
+                                <span class="spice-icon">🌶️</span>
+                                <span class="spice-icon opacity-50">🌶️</span>
+                                <span class="spice-icon opacity-50">🌶️</span>
+                            </div>
+                            <div class="flex gap-2 mb-4">
+                                <span class="dietary-badge bg-secondary/10 text-secondary">
+                                    <span>🌿</span> V
+                                </span>
+                                <span class="dietary-badge bg-accent/10 text-orange-700">
+                                    <span>🌾</span> GF
+                                </span>
+                            </div>
+                            <button onclick="showToast()" class="w-full bg-primary hover:bg-orange-600 text-white py-3 rounded-lg font-semibold transition">
+                                Add to Order
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Panang Curry -->
+                    <div class="menu-item-card bg-white rounded-2xl overflow-hidden shadow-lg">
+                        <div class="h-56 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1562565652-a0d8f0c59eb4?w=600&q=85')"></div>
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-2xl font-serif font-semibold">Panang Curry</h3>
+                                <span class="text-xl font-bold text-primary">$13.95</span>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-3">
+                                Rich peanut curry, coconut cream, kaffir lime leaves
+                            </p>
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="spice-icon">🌶️</span>
+                                <span class="spice-icon">🌶️</span>
+                                <span class="spice-icon opacity-50">🌶️</span>
+                                <span class="spice-icon opacity-50">🌶️</span>
+                                <span class="spice-icon opacity-50">🌶️</span>
+                            </div>
+                            <div class="flex gap-2 mb-4">
+                                <span class="dietary-badge bg-secondary/10 text-secondary">
+                                    <span>🌿</span> V
+                                </span>
+                                <span class="dietary-badge bg-accent/10 text-orange-700">
+                                    <span>🌾</span> GF
+                                </span>
+                            </div>
+                            <button onclick="showToast()" class="w-full bg-primary hover:bg-orange-600 text-white py-3 rounded-lg font-semibold transition">
+                                Add to Order
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Red Curry -->
+                    <div class="menu-item-card bg-white rounded-2xl overflow-hidden shadow-lg">
+                        <div class="h-56 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=600&q=85')"></div>
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-2xl font-serif font-semibold">Red Curry</h3>
+                                <span class="text-xl font-bold text-primary">$13.95</span>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-3">
+                                Spicy red curry paste, coconut milk, bamboo shoots, basil
+                            </p>
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="spice-icon">🌶️</span>
+                                <span class="spice-icon">🌶️</span>
+                                <span class="spice-icon">🌶️</span>
+                                <span class="spice-icon">🌶️</span>
+                                <span class="spice-icon opacity-50">🌶️</span>
+                            </div>
+                            <div class="flex gap-2 mb-4">
+                                <span class="dietary-badge bg-secondary/10 text-secondary">
+                                    <span>🌿</span> V
+                                </span>
+                                <span class="dietary-badge bg-accent/10 text-orange-700">
+                                    <span>🌾</span> GF
+                                </span>
+                            </div>
+                            <button onclick="showToast()" class="w-full bg-primary hover:bg-orange-600 text-white py-3 rounded-lg font-semibold transition">
+                                Add to Order
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Chef's Specials -->
+            <div class="mb-16 category-section" data-category="chef">
+                <h2 class="text-4xl font-serif font-bold mb-8 flex items-center gap-3">
+                    <span>⭐</span> Chef's Specials
+                </h2>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                    <!-- Tom Yum Soup -->
+                    <div class="menu-item-card bg-white rounded-2xl overflow-hidden shadow-lg border-2 border-primary">
+                        <div class="h-56 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1559314809-0d155014e29e?w=600&q=85')"></div>
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-2xl font-serif font-semibold">Tom Yum Soup</h3>
+                                <span class="text-xl font-bold text-primary">$11.95</span>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-3">
+                                Hot & sour soup with lemongrass, galangal, kaffir lime
+                            </p>
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="spice-icon">🌶️</span>
+                                <span class="spice-icon">🌶️</span>
+                                <span class="spice-icon">🌶️</span>
+                                <span class="spice-icon opacity-50">🌶️</span>
+                                <span class="spice-icon opacity-50">🌶️</span>
+                            </div>
+                            <div class="flex gap-2 mb-4">
+                                <span class="dietary-badge bg-accent/10 text-orange-700">
+                                    <span>🌾</span> GF
+                                </span>
+                                <span class="dietary-badge bg-primary/10 text-primary">
+                                    <span>⭐</span> Most Popular
+                                </span>
+                            </div>
+                            <button onclick="showToast()" class="w-full bg-primary hover:bg-orange-600 text-white py-3 rounded-lg font-semibold transition">
+                                Add to Order
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Mango Sticky Rice -->
+                    <div class="menu-item-card bg-white rounded-2xl overflow-hidden shadow-lg">
+                        <div class="h-56 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1609501676725-7186f017a4b0?w=600&q=85')"></div>
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-2xl font-serif font-semibold">Mango Sticky Rice</h3>
+                                <span class="text-xl font-bold text-primary">$7.95</span>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-3">
+                                Sweet coconut sticky rice topped with fresh mango slices
+                            </p>
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="text-sm text-gray-500">No Spice</span>
+                            </div>
+                            <div class="flex gap-2 mb-4">
+                                <span class="dietary-badge bg-secondary/10 text-secondary">
+                                    <span>🌿</span> Vegan
+                                </span>
+                                <span class="dietary-badge bg-accent/10 text-orange-700">
+                                    <span>🌾</span> GF
+                                </span>
+                            </div>
+                            <button onclick="showToast()" class="w-full bg-primary hover:bg-orange-600 text-white py-3 rounded-lg font-semibold transition">
+                                Add to Order
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Papaya Salad -->
+                    <div class="menu-item-card bg-white rounded-2xl overflow-hidden shadow-lg">
+                        <div class="h-56 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1567337710282-00832b415979?w=600&q=85')"></div>
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-2xl font-serif font-semibold">Som Tum</h3>
+                                <span class="text-xl font-bold text-primary">$10.95</span>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-3">
+                                Green papaya salad with tomatoes, peanuts, lime dressing
+                            </p>
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="spice-icon">🌶️</span>
+                                <span class="spice-icon">🌶️</span>
+                                <span class="spice-icon">🌶️</span>
+                                <span class="spice-icon">🌶️</span>
+                                <span class="spice-icon opacity-50">🌶️</span>
+                            </div>
+                            <div class="flex gap-2 mb-4">
+                                <span class="dietary-badge bg-secondary/10 text-secondary">
+                                    <span>🌿</span> Vegan
+                                </span>
+                                <span class="dietary-badge bg-accent/10 text-orange-700">
+                                    <span>🌾</span> GF
+                                </span>
+                            </div>
+                            <button onclick="showToast()" class="w-full bg-primary hover:bg-orange-600 text-white py-3 rounded-lg font-semibold transition">
+                                Add to Order
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Appetizers -->
+            <div class="mb-16 category-section" data-category="appetizers">
+                <h2 class="text-4xl font-serif font-bold mb-8 flex items-center gap-3">
+                    <span>🥟</span> Appetizers
+                </h2>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                    <!-- Spring Rolls -->
+                    <div class="menu-item-card bg-white rounded-2xl overflow-hidden shadow-lg">
+                        <div class="h-56 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1587306739292-cf5bc5e4a0d3?w=600&q=85')"></div>
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-2xl font-serif font-semibold">Spring Rolls</h3>
+                                <span class="text-xl font-bold text-primary">$6.95</span>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-3">
+                                Crispy vegetable spring rolls with sweet chili sauce (4 pcs)
+                            </p>
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="spice-icon">🌶️</span>
+                                <span class="spice-icon opacity-50">🌶️</span>
+                                <span class="spice-icon opacity-50">🌶️</span>
+                                <span class="spice-icon opacity-50">🌶️</span>
+                                <span class="spice-icon opacity-50">🌶️</span>
+                            </div>
+                            <div class="flex gap-2 mb-4">
+                                <span class="dietary-badge bg-secondary/10 text-secondary">
+                                    <span>🌿</span> Vegan
+                                </span>
+                            </div>
+                            <button onclick="showToast()" class="w-full bg-primary hover:bg-orange-600 text-white py-3 rounded-lg font-semibold transition">
+                                Add to Order
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Satay -->
+                    <div class="menu-item-card bg-white rounded-2xl overflow-hidden shadow-lg">
+                        <div class="h-56 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=600&q=85')"></div>
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-2xl font-serif font-semibold">Chicken Satay</h3>
+                                <span class="text-xl font-bold text-primary">$8.95</span>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-3">
+                                Grilled marinated chicken skewers with peanut sauce (5 pcs)
+                            </p>
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="spice-icon">🌶️</span>
+                                <span class="spice-icon opacity-50">🌶️</span>
+                                <span class="spice-icon opacity-50">🌶️</span>
+                                <span class="spice-icon opacity-50">🌶️</span>
+                                <span class="spice-icon opacity-50">🌶️</span>
+                            </div>
+                            <div class="flex gap-2 mb-4">
+                                <span class="dietary-badge bg-accent/10 text-orange-700">
+                                    <span>🌾</span> GF
+                                </span>
+                            </div>
+                            <button onclick="showToast()" class="w-full bg-primary hover:bg-orange-600 text-white py-3 rounded-lg font-semibold transition">
+                                Add to Order
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Thai Dumplings -->
+                    <div class="menu-item-card bg-white rounded-2xl overflow-hidden shadow-lg">
+                        <div class="h-56 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=600&q=85')"></div>
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-2xl font-serif font-semibold">Thai Dumplings</h3>
+                                <span class="text-xl font-bold text-primary">$7.95</span>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-3">
+                                Steamed or fried pork & shrimp dumplings (6 pcs)
+                            </p>
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="spice-icon">🌶️</span>
+                                <span class="spice-icon opacity-50">🌶️</span>
+                                <span class="spice-icon opacity-50">🌶️</span>
+                                <span class="spice-icon opacity-50">🌶️</span>
+                                <span class="spice-icon opacity-50">🌶️</span>
+                            </div>
+                            <div class="flex gap-2 mb-4">
+                            </div>
+                            <button onclick="showToast()" class="w-full bg-primary hover:bg-orange-600 text-white py-3 rounded-lg font-semibold transition">
+                                Add to Order
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Desserts -->
+            <div class="mb-16 category-section" data-category="desserts">
+                <h2 class="text-4xl font-serif font-bold mb-8 flex items-center gap-3">
+                    <span>🍨</span> Desserts & Drinks
+                </h2>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                    <!-- Thai Iced Tea -->
+                    <div class="menu-item-card bg-white rounded-2xl overflow-hidden shadow-lg">
+                        <div class="h-56 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1556881286-fc6915169721?w=600&q=85')"></div>
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-2xl font-serif font-semibold">Thai Iced Tea</h3>
+                                <span class="text-xl font-bold text-primary">$4.50</span>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-3">
+                                Sweet & creamy Thai tea served over ice
+                            </p>
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="text-sm text-gray-500">No Spice</span>
+                            </div>
+                            <div class="flex gap-2 mb-4">
+                                <span class="dietary-badge bg-secondary/10 text-secondary">
+                                    <span>🌿</span> V
+                                </span>
+                            </div>
+                            <button onclick="showToast()" class="w-full bg-primary hover:bg-orange-600 text-white py-3 rounded-lg font-semibold transition">
+                                Add to Order
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Coconut Ice Cream -->
+                    <div class="menu-item-card bg-white rounded-2xl overflow-hidden shadow-lg">
+                        <div class="h-56 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=600&q=85')"></div>
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-2xl font-serif font-semibold">Coconut Ice Cream</h3>
+                                <span class="text-xl font-bold text-primary">$5.95</span>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-3">
+                                Homemade coconut ice cream with roasted peanuts
+                            </p>
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="text-sm text-gray-500">No Spice</span>
+                            </div>
+                            <div class="flex gap-2 mb-4">
+                                <span class="dietary-badge bg-secondary/10 text-secondary">
+                                    <span>🌿</span> Vegan
+                                </span>
+                                <span class="dietary-badge bg-accent/10 text-orange-700">
+                                    <span>🌾</span> GF
+                                </span>
+                            </div>
+                            <button onclick="showToast()" class="w-full bg-primary hover:bg-orange-600 text-white py-3 rounded-lg font-semibold transition">
+                                Add to Order
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Thai Iced Coffee -->
+                    <div class="menu-item-card bg-white rounded-2xl overflow-hidden shadow-lg">
+                        <div class="h-56 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=600&q=85')"></div>
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-2xl font-serif font-semibold">Thai Iced Coffee</h3>
+                                <span class="text-xl font-bold text-primary">$4.50</span>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-3">
+                                Strong Thai coffee with condensed milk over ice
+                            </p>
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="text-sm text-gray-500">No Spice</span>
+                            </div>
+                            <div class="flex gap-2 mb-4">
+                                <span class="dietary-badge bg-secondary/10 text-secondary">
+                                    <span>🌿</span> V
+                                </span>
+                            </div>
+                            <button onclick="showToast()" class="w-full bg-primary hover:bg-orange-600 text-white py-3 rounded-lg font-semibold transition">
+                                Add to Order
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Dietary Legend -->
+    <section class="py-12 bg-white">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="bg-neutral rounded-2xl p-8">
+                <h3 class="text-2xl font-serif font-bold mb-6 text-center">Dietary Information</h3>
+                <div class="grid md:grid-cols-4 gap-6 text-center">
+                    <div>
+                        <span class="text-3xl mb-2 block">🌿</span>
+                        <h4 class="font-semibold mb-1">Vegetarian</h4>
+                        <p class="text-sm text-gray-600">Marked with V</p>
+                    </div>
+                    <div>
+                        <span class="text-3xl mb-2 block">🌾</span>
+                        <h4 class="font-semibold mb-1">Gluten-Free</h4>
+                        <p class="text-sm text-gray-600">Marked with GF</p>
+                    </div>
+                    <div>
+                        <span class="text-3xl mb-2 block">🌶️</span>
+                        <h4 class="font-semibold mb-1">Spice Levels</h4>
+                        <p class="text-sm text-gray-600">1-5 peppers (customizable)</p>
+                    </div>
+                    <div>
+                        <span class="text-3xl mb-2 block">💬</span>
+                        <h4 class="font-semibold mb-1">Allergies?</h4>
+                        <p class="text-sm text-gray-600">Just ask our staff</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center gap-2 mb-4">
+                        <svg class="w-8 h-8 text-primary" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm0 18c-3.31-1-6-4.37-6-8V8.3l6-3.11 6 3.11V12c0 3.63-2.69 7-6 8z"/>
+                            <circle cx="12" cy="11" r="2"/>
+                        </svg>
+                        <span class="text-xl font-serif font-bold">Thai Cafe</span>
+                    </div>
+                    <p class="text-gray-400 text-sm">
+                        Authentic Thai flavors in the heart of Irvine since day one.
+                    </p>
+                </div>
+
+                <div>
+                    <h3 class="font-semibold mb-4">Quick Links</h3>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="index.html" class="hover:text-white transition">Home</a></li>
+                        <li><a href="menu.html" class="hover:text-white transition">Menu</a></li>
+                        <li><a href="reservations.html" class="hover:text-white transition">Reservations</a></li>
+                        <li><a href="order.html" class="hover:text-white transition">Order Online</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="font-semibold mb-4">Contact</h3>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li>(949) 559-5382</li>
+                        <li>14715 Jeffrey Rd<br>Irvine, CA 92618</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="font-semibold mb-4">Hours</h3>
+                    <p class="text-gray-400 text-sm">
+                        Daily: 11:00 AM – 3:00 PM<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5:00 PM – 10:00 PM
+                    </p>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800 pt-8 text-center text-gray-400 text-sm">
+                <p>&copy; 2024 Thai Cafe. All rights reserved. | This is a visual mockup for presentation purposes.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Toast notification
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Category filtering
+        function filterCategory(category) {
+            const tabs = document.querySelectorAll('.category-tab');
+            const sections = document.querySelectorAll('.category-section');
+
+            tabs.forEach(tab => tab.classList.remove('active'));
+            event.target.closest('.category-tab').classList.add('active');
+
+            if (category === 'all') {
+                sections.forEach(section => section.style.display = 'block');
+            } else {
+                sections.forEach(section => {
+                    if (section.dataset.category === category) {
+                        section.style.display = 'block';
+                    } else {
+                        section.style.display = 'none';
+                    }
+                });
+            }
+        }
+
+        // Intersection Observer for menu items
+        const observerOptions = {
+            threshold: 0.2,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, index) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => {
+                        entry.target.classList.add('visible');
+                    }, index * 100);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.menu-item-card').forEach(card => {
+            observer.observe(card);
+        });
+
+        // Mobile menu
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+            showToast();
+        });
+    </script>
+</body>
+</html>
