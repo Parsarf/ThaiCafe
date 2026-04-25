@@ -161,3 +161,4 @@ Thai Cafe
 
 **Mock Website Created:** 2024
 **Status:** Visual Mockup - Non-Functional Demo
+# ThaiCafee
